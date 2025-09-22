@@ -1,0 +1,1 @@
+// definición de tabla alerts

@@ -1,0 +1,1 @@
+// clase AppDatabase (instancia Drift, schemaVersion, migraciones)

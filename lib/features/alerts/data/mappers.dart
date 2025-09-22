@@ -1,0 +1,1 @@
+// mapear DB ↔︎ dominio (Alert)
