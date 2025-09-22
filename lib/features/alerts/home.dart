@@ -72,17 +72,51 @@ class _HomePageState extends State<HomePage> {
 
   // NUEVO: editar → reusar create_alert.dart en modo edición
   Future<void> _editAlert(int index) async {
-    final current = _alerts[index];
-    await Navigator.of(context).pushNamed(
-      '/create_alert',
-      arguments: {
-        'mode': 'edit',
-        'alert': current, // pasa el objeto actual (o su id)
-      },
+    final a = _alerts[index];
+
+    final res = await Navigator.of(context).push<dynamic>(
+      MaterialPageRoute(
+        builder: (_) => CreateAlertPage(
+          isEditing: true,
+          initialTitle: a.title,
+          initialMessage: a.message,
+          initialLatitude: a.latitude,
+          initialLongitude: a.longitude,
+          initialRadiusM: a.radiusM,
+          initialStartAt: a.startAt,
+          initialExpireAt: a.expireAt,
+          onDelete: () {
+            setState(() => _alerts.removeAt(index));
+          },
+        ),
+      ),
     );
-    // Cuando implementes la pantalla, acá puedes refrescar la lista si volvió editada
-    // setState(() {});
+
+    if (!mounted || res == null || res == '__DELETE__') return;
+
+    if (res is Map<String, dynamic>) {
+      final startRaw = res['startAt'];
+      final expireRaw = res['expireAt'];
+      final newStartAt = startRaw is String ? DateTime.parse(startRaw) : startRaw as DateTime;
+      final newExpireAt = expireRaw == null
+          ? null
+          : (expireRaw is String ? DateTime.tryParse(expireRaw) : expireRaw as DateTime?);
+
+      setState(() {
+        _alerts[index] = a.copyWith(
+          title: (res['title'] as String).trim(),
+          message: (res['message'] as String?)?.trim(),
+          latitude: (res['latitude'] as num).toDouble(),
+          longitude: (res['longitude'] as num).toDouble(),
+          radiusM: (res['radiusM'] as num).toInt(),
+          startAt: newStartAt,
+          expireAt: newExpireAt,
+          updatedAt: DateTime.now().toUtc(),
+        );
+      });
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
