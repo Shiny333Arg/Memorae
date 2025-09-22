@@ -12,7 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<AlertItem> _alerts = List.from(sampleAlerts);
+  final List<Alert> _alerts = List.from(sampleAlerts);
 
   // Estado de sesión (placeholder)
   bool _loggedIn = false;
@@ -40,9 +40,16 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).pushNamed('/orgs');
   }
 
-  void _toggleAlert(int index, bool enabled) {
-    setState(() => _alerts[index].enabled = enabled);
+  void _toggleAlert(int index, bool active) {
+    setState(() {
+      final a = _alerts[index];
+      _alerts[index] = a.copyWith(
+        deviceActive: active,
+        updatedAt: DateTime.now().toUtc(),
+      );
+    });
   }
+
 
   // NUEVO: crear → ir a create_alert.dart (ruta '/create_alert')
   void _createAlert() {

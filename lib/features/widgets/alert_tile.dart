@@ -10,7 +10,7 @@ class AlertTile extends StatelessWidget {
     this.onTap, //callback opcional
   });
 
-  final AlertItem alert;
+  final Alert alert;
   final ValueChanged<bool> onChanged;
   final VoidCallback? onTap;
 
@@ -21,7 +21,7 @@ class AlertTile extends StatelessWidget {
         leading: const Icon(Icons.location_on, color: Colors.red),
         title: Text(alert.title),
         trailing: Switch.adaptive(
-          value: alert.enabled,
+          value: alert.deviceActive,
           onChanged: onChanged,
           activeColor: kSwitchActive,
           inactiveThumbColor: kSwitchThumbInactive,
