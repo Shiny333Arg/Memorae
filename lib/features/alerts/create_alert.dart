@@ -227,7 +227,7 @@ class _CreateAlertPageState extends State<CreateAlertPage> {
                     // Título
                     TextField(
                       controller: _titleCtrl,
-                      autofocus: !widget.isEditing,
+                      //autofocus: !widget.isEditing,
                       minLines: 2,
                       maxLines: 2,
                       maxLength: 50,
