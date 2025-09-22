@@ -3,6 +3,7 @@ import '../../models/alert_item.dart';
 import '../../theme/app_theme.dart';
 import '../../data/sample_alerts.dart';
 import '../widgets/alert_tile.dart';
+import 'create_alert.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -45,7 +46,21 @@ class _HomePageState extends State<HomePage> {
 
   // NUEVO: crear → ir a create_alert.dart (ruta '/create_alert')
   void _createAlert() {
-    Navigator.of(context).pushNamed('/create_alert');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const CreateAlertPage(
+          isEditing: false,
+          // Puedes prellenar si quieres:
+          // initialTitle: 'Nueva alerta',
+          // initialLatitude: -24.18560,
+          // initialLongitude: -65.29950,
+          initialRadiusM: 150,
+          // initialIsActive: true,
+          // initialStartAt: null,    // se elige en la pantalla
+          // initialExpireAt: null,   // opcional
+        ),
+      ),
+    );
   }
 
   // NUEVO: editar → reusar create_alert.dart en modo edición
