@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
+
 
 class CreateAlertPage extends StatefulWidget {
   const CreateAlertPage({
@@ -128,6 +130,7 @@ class _CreateAlertPageState extends State<CreateAlertPage> {
     });
   }
 
+  /*
   Future<void> _pickLocation() async {
     if (widget.onPickLocation == null) return;
     final res = await widget.onPickLocation!.call();
@@ -142,7 +145,40 @@ class _CreateAlertPageState extends State<CreateAlertPage> {
       _locLabel = label ??
           '(${_lat!.toStringAsFixed(5)}, ${_lon!.toStringAsFixed(5)})';
     });
+  }*/
+  Future<void> _pickLocation() async {
+    // 1) Intentar usar el callback (si viene desde el caller)
+    Map<String, dynamic>? res;
+    if (widget.onPickLocation != null) {
+      res = await widget.onPickLocation!.call();
+    }
+
+    // 2) Fallback de PRUEBA (solo en debug) si no hay callback o devolvió null
+    if (res == null && kDebugMode) {
+      res = {
+        'latitude': -24.18560,
+        'longitude': -65.29950,
+        'label': 'Punto de prueba',
+      };
+    }
+
+    // 3) Si sigue sin datos, no hacemos nada
+    if (res == null) return;
+
+    // 4) Parse robusto (acepta int o double)
+    final lat = (res['latitude'] as num?)?.toDouble();
+    final lon = (res['longitude'] as num?)?.toDouble();
+    final label = res['label'] as String?;
+    if (lat == null || lon == null) return;
+
+    // 5) Actualizar estado
+    setState(() {
+      _lat = lat;
+      _lon = lon;
+      _locLabel = label ?? '(${_lat!.toStringAsFixed(5)}, ${_lon!.toStringAsFixed(5)})';
+    });
   }
+
 
   void _save() {
     final title = _titleCtrl.text.trim();

@@ -31,8 +31,6 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  //final List<Alert> _alerts = List.from(sampleAlerts);
-
   // Estado de sesión (placeholder)
   bool _loggedIn = false;
 
@@ -59,40 +57,38 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).pushNamed('/orgs');
   }
 
-  void _toggleAlert(int index, bool active) {
-    setState(() {
-      final a = _alerts[index];
-      _alerts[index] = a.copyWith(
-        deviceActive: active,
-        updatedAt: DateTime.now().toUtc(),
-      );
-    });
-  }
-
-
-  // NUEVO: crear → ir a create_alert.dart (ruta '/create_alert')
-  void _createAlert() {
-    Navigator.of(context).push(
+  // CREAR alerta → usa CreateAlertPage y luego repo.create(...)
+  Future<void> _createAlert() async {
+    final res = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
-        builder: (_) => const CreateAlertPage(
-          isEditing: false,
-          // Puedes prellenar si quieres:
-          // initialTitle: 'Nueva alerta',
-          // initialLatitude: -24.18560,
-          // initialLongitude: -65.29950,
-          initialRadiusM: 150,
-          // initialIsActive: true,
-          // initialStartAt: null,    // se elige en la pantalla
-          // initialExpireAt: null,   // opcional
-        ),
+        builder: (_) => const CreateAlertPage(isEditing: false),
       ),
     );
+    if (!mounted || res == null) return;
+
+    final startRaw = res['startAt'];
+    final expireRaw = res['expireAt'];
+    final startAt = startRaw is String ? DateTime.parse(startRaw) : startRaw as DateTime;
+    final expireAt = expireRaw == null
+        ? null
+        : (expireRaw is String ? DateTime.tryParse(expireRaw) : expireRaw as DateTime?);
+
+    final draft = Alert.create(
+      title: (res['title'] as String).trim(),
+      message: (res['message'] as String?)?.trim(),
+      latitude: (res['latitude'] as num).toDouble(),
+      longitude: (res['longitude'] as num).toDouble(),
+      radiusM: (res['radiusM'] as num).toInt(),
+      startAt: startAt,
+      expireAt: expireAt,
+      // orgId: null // personal por ahora
+    );
+
+    await _repo.create(draft);
   }
 
-  // NUEVO: editar → reusar create_alert.dart en modo edición
-  Future<void> _editAlert(int index) async {
-    final a = _alerts[index];
-
+  // EDITAR alerta → reusa CreateAlertPage en modo edición y luego repo.update(...)
+  Future<void> _editAlert(Alert a) async {
     final res = await Navigator.of(context).push<dynamic>(
       MaterialPageRoute(
         builder: (_) => CreateAlertPage(
@@ -104,8 +100,10 @@ class _HomePageState extends State<HomePage> {
           initialRadiusM: a.radiusM,
           initialStartAt: a.startAt,
           initialExpireAt: a.expireAt,
-          onDelete: () {
-            setState(() => _alerts.removeAt(index));
+          onDelete: () async {
+            if (a.id != null) {
+              await _repo.delete(a.id!);
+            }
           },
         ),
       ),
@@ -121,21 +119,20 @@ class _HomePageState extends State<HomePage> {
           ? null
           : (expireRaw is String ? DateTime.tryParse(expireRaw) : expireRaw as DateTime?);
 
-      setState(() {
-        _alerts[index] = a.copyWith(
-          title: (res['title'] as String).trim(),
-          message: (res['message'] as String?)?.trim(),
-          latitude: (res['latitude'] as num).toDouble(),
-          longitude: (res['longitude'] as num).toDouble(),
-          radiusM: (res['radiusM'] as num).toInt(),
-          startAt: newStartAt,
-          expireAt: newExpireAt,
-          updatedAt: DateTime.now().toUtc(),
-        );
-      });
+      final updated = a.copyWith(
+        title: (res['title'] as String).trim(),
+        message: (res['message'] as String?)?.trim(),
+        latitude: (res['latitude'] as num).toDouble(),
+        longitude: (res['longitude'] as num).toDouble(),
+        radiusM: (res['radiusM'] as num).toInt(),
+        startAt: newStartAt,
+        expireAt: newExpireAt,
+        updatedAt: DateTime.now().toUtc(),
+      );
+
+      await _repo.update(updated);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -155,30 +152,38 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: _alerts.isEmpty
-          ? const Center(
-        child: Text("No hay alertas aún",
-            style: TextStyle(color: Colors.white)),
-      )
-          : Scrollbar(
-        thumbVisibility: true,
-        child: ListView.separated(
-          padding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          itemCount: _alerts.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 6),
-          itemBuilder: (context, index) {
-            final alert = _alerts[index];
-            return AlertTile(
-              alert: alert,
-              onChanged: (val) => _toggleAlert(index, val),
-              onTap: () => _editAlert(index),
-            );
-          },
-        ),
+      body: StreamBuilder<List<Alert>>(
+        stream: _repo.watchAll(),
+        builder: (context, snap) {
+          final alerts = snap.data ?? const <Alert>[];
+          if (alerts.isEmpty) {
+            return const Center(child: Text('No hay alertas aún',
+                style: TextStyle(color: Colors.white)));
+          }
+          return Scrollbar(
+            thumbVisibility: true,
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              itemCount: alerts.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 6),
+              itemBuilder: (context, index) {
+                final alert = alerts[index];
+                return AlertTile(
+                  alert: alert,
+                  onChanged: (val) {
+                    if (alert.id != null) {
+                      _repo.setActive(alert.id!, val);
+                    }
+                  },
+                  onTap: () => _editAlert(alert),
+                );
+              },
+            ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _createAlert, // ← antes abría el selector; ahora navega directo
+        onPressed: _createAlert,
         backgroundColor: const Color(0xFFFFFFFF),
         foregroundColor: const Color(0xFF000000),
         child: const Icon(Icons.add),
