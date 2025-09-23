@@ -4,6 +4,9 @@ import '../../theme/app_theme.dart';
 import '../../data/sample_alerts.dart';
 import '../widgets/alert_tile.dart';
 import 'create_alert.dart';
+import 'data/alerts_repository.dart';
+import '../../db/database.dart';
+import '../../models/alert_item.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,7 +15,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Alert> _alerts = List.from(sampleAlerts);
+  late final AppDatabase _db;
+  late final AlertsRepository _repo;
+
+  @override
+  void initState() {
+    super.initState();
+    _db = AppDatabase();
+    _repo = AlertsRepository(_db);
+  }
+
+  @override
+  void dispose() {
+    _db.dispose(); // cierra la DB
+    super.dispose();
+  }
+
+  //final List<Alert> _alerts = List.from(sampleAlerts);
 
   // Estado de sesión (placeholder)
   bool _loggedIn = false;

@@ -3,7 +3,7 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
-class $AlertsTable extends Alerts with TableInfo<$AlertsTable, Alert> {
+class $AlertsTable extends Alerts with TableInfo<$AlertsTable, AlertRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -203,7 +203,7 @@ class $AlertsTable extends Alerts with TableInfo<$AlertsTable, Alert> {
   static const String $name = 'alerts';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Alert> instance, {
+    Insertable<AlertRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -327,9 +327,9 @@ class $AlertsTable extends Alerts with TableInfo<$AlertsTable, Alert> {
     {ownerUid, remoteId},
   ];
   @override
-  Alert map(Map<String, dynamic> data, {String? tablePrefix}) {
+  AlertRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Alert(
+    return AlertRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -399,7 +399,7 @@ class $AlertsTable extends Alerts with TableInfo<$AlertsTable, Alert> {
   }
 }
 
-class Alert extends DataClass implements Insertable<Alert> {
+class AlertRow extends DataClass implements Insertable<AlertRow> {
   final int id;
   final int? orgId;
   final String? ownerUid;
@@ -415,7 +415,7 @@ class Alert extends DataClass implements Insertable<Alert> {
   final bool deviceActive;
   final bool? serverActive;
   final DateTime updatedAt;
-  const Alert({
+  const AlertRow({
     required this.id,
     this.orgId,
     this.ownerUid,
@@ -497,12 +497,12 @@ class Alert extends DataClass implements Insertable<Alert> {
     );
   }
 
-  factory Alert.fromJson(
+  factory AlertRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Alert(
+    return AlertRow(
       id: serializer.fromJson<int>(json['id']),
       orgId: serializer.fromJson<int?>(json['orgId']),
       ownerUid: serializer.fromJson<String?>(json['ownerUid']),
@@ -542,7 +542,7 @@ class Alert extends DataClass implements Insertable<Alert> {
     };
   }
 
-  Alert copyWith({
+  AlertRow copyWith({
     int? id,
     Value<int?> orgId = const Value.absent(),
     Value<String?> ownerUid = const Value.absent(),
@@ -558,7 +558,7 @@ class Alert extends DataClass implements Insertable<Alert> {
     bool? deviceActive,
     Value<bool?> serverActive = const Value.absent(),
     DateTime? updatedAt,
-  }) => Alert(
+  }) => AlertRow(
     id: id ?? this.id,
     orgId: orgId.present ? orgId.value : this.orgId,
     ownerUid: ownerUid.present ? ownerUid.value : this.ownerUid,
@@ -575,8 +575,8 @@ class Alert extends DataClass implements Insertable<Alert> {
     serverActive: serverActive.present ? serverActive.value : this.serverActive,
     updatedAt: updatedAt ?? this.updatedAt,
   );
-  Alert copyWithCompanion(AlertsCompanion data) {
-    return Alert(
+  AlertRow copyWithCompanion(AlertsCompanion data) {
+    return AlertRow(
       id: data.id.present ? data.id.value : this.id,
       orgId: data.orgId.present ? data.orgId.value : this.orgId,
       ownerUid: data.ownerUid.present ? data.ownerUid.value : this.ownerUid,
@@ -601,7 +601,7 @@ class Alert extends DataClass implements Insertable<Alert> {
 
   @override
   String toString() {
-    return (StringBuffer('Alert(')
+    return (StringBuffer('AlertRow(')
           ..write('id: $id, ')
           ..write('orgId: $orgId, ')
           ..write('ownerUid: $ownerUid, ')
@@ -642,7 +642,7 @@ class Alert extends DataClass implements Insertable<Alert> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Alert &&
+      (other is AlertRow &&
           other.id == this.id &&
           other.orgId == this.orgId &&
           other.ownerUid == this.ownerUid &&
@@ -660,7 +660,7 @@ class Alert extends DataClass implements Insertable<Alert> {
           other.updatedAt == this.updatedAt);
 }
 
-class AlertsCompanion extends UpdateCompanion<Alert> {
+class AlertsCompanion extends UpdateCompanion<AlertRow> {
   final Value<int> id;
   final Value<int?> orgId;
   final Value<String?> ownerUid;
@@ -716,7 +716,7 @@ class AlertsCompanion extends UpdateCompanion<Alert> {
        radiusM = Value(radiusM),
        startAt = Value(startAt),
        updatedAt = Value(updatedAt);
-  static Insertable<Alert> custom({
+  static Insertable<AlertRow> custom({
     Expression<int>? id,
     Expression<int>? orgId,
     Expression<String>? ownerUid,
@@ -1144,14 +1144,14 @@ class $$AlertsTableTableManager
         RootTableManager<
           _$AppDatabase,
           $AlertsTable,
-          Alert,
+          AlertRow,
           $$AlertsTableFilterComposer,
           $$AlertsTableOrderingComposer,
           $$AlertsTableAnnotationComposer,
           $$AlertsTableCreateCompanionBuilder,
           $$AlertsTableUpdateCompanionBuilder,
-          (Alert, BaseReferences<_$AppDatabase, $AlertsTable, Alert>),
-          Alert,
+          (AlertRow, BaseReferences<_$AppDatabase, $AlertsTable, AlertRow>),
+          AlertRow,
           PrefetchHooks Function()
         > {
   $$AlertsTableTableManager(_$AppDatabase db, $AlertsTable table)
@@ -1245,14 +1245,14 @@ typedef $$AlertsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $AlertsTable,
-      Alert,
+      AlertRow,
       $$AlertsTableFilterComposer,
       $$AlertsTableOrderingComposer,
       $$AlertsTableAnnotationComposer,
       $$AlertsTableCreateCompanionBuilder,
       $$AlertsTableUpdateCompanionBuilder,
-      (Alert, BaseReferences<_$AppDatabase, $AlertsTable, Alert>),
-      Alert,
+      (AlertRow, BaseReferences<_$AppDatabase, $AlertsTable, AlertRow>),
+      AlertRow,
       PrefetchHooks Function()
     >;
 

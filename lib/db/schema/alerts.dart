@@ -2,6 +2,7 @@
 
 import 'package:drift/drift.dart';
 
+@DataClassName('AlertRow')
 class Alerts extends Table {
   // Identificadores
   IntColumn get id         => integer().autoIncrement()();
